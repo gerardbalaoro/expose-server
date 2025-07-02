@@ -56,6 +56,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Connection Cooldown Period
+    |--------------------------------------------------------------------------
+    |
+    | After a client is disconnected due to reaching the maximum connection
+    | length, they must wait this many minutes before reconnecting.
+    | Set to 0 to disable the cooldown period.
+    |
+    */
+    'connection_cooldown_period' => 0,
+
+    /*
+    |--------------------------------------------------------------------------
     | Maximum number of open connections
     |--------------------------------------------------------------------------
     |
@@ -182,6 +194,7 @@ return [
         'custom_domain_unauthorized' => 'You are not allowed to use this custom domain. If you think this should work, double-check the server setting and try again.',
 
         'maximum_connection_length_reached' => 'You have reached the maximum connection length for this server. Please upgrade to Expose Pro for unlimited connection length.',
+        'connection_cooldown_active' => 'You\'ve used your free session for now. Please wait :cooldown minutes before reconnecting, or upgrade to Expose Pro → https://expose.dev/pro',
     ],
 
     'statistics' => [

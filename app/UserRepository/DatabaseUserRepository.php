@@ -106,6 +106,17 @@ class DatabaseUserRepository implements UserRepository
         $user['sites'] = $user['auth_token'] !== '' ? $this->connectionManager->getConnectionsForAuthToken($user['auth_token']) : [];
         $user['tcp_connections'] = $user['auth_token'] !== '' ? $this->connectionManager->getTcpConnectionsForAuthToken($user['auth_token']) : [];
 
+        $user['is_in_cooldown'] = false;
+        $user['cooldown_minutes_remaining'] = 0;
+        
+        if (!empty($user['cooldown_ends_at'])) {
+            $currentTime = time();
+            if ($currentTime < $user['cooldown_ends_at']) {
+                $user['is_in_cooldown'] = true;
+                $user['cooldown_minutes_remaining'] = ceil(($user['cooldown_ends_at'] - $currentTime) / 60);
+            }
+        }
+
         return $user;
     }
 
@@ -229,6 +240,22 @@ class DatabaseUserRepository implements UserRepository
                 })->toArray();
 
                 $deferred->resolve($users);
+            });
+
+        return $deferred->promise();
+    }
+
+    public function setCooldownForToken(string $authToken, int $cooldownEndsAt): PromiseInterface
+    {
+        $deferred = new Deferred();
+
+        $this->database
+            ->query('UPDATE users SET cooldown_ends_at = :cooldown_ends_at WHERE auth_token = :token', [
+                'cooldown_ends_at' => $cooldownEndsAt,
+                'token' => $authToken,
+            ])
+            ->then(function (Result $result) use ($deferred) {
+                $deferred->resolve(null);
             });
 
         return $deferred->promise();

@@ -23,4 +23,6 @@ interface UserRepository
     public function getUsersByTokens(array $authTokens): PromiseInterface;
 
     public function updateLastSharedAt($id): PromiseInterface;
+
+    public function setCooldownForToken(string $authToken, int $cooldownEndsAt): PromiseInterface;
 }
