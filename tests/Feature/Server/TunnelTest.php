@@ -594,6 +594,30 @@ class TunnelTest extends TestCase
         $this->assertNotSame('foo', $response->subdomain);
     }
 
+    /** @test */
+    public function it_rejects_clients_that_are_in_cooldown()
+    {
+        $this->app['config']['expose-server.validate_auth_tokens'] = true;
+        $this->app['config']['expose-server.connection_cooldown_period'] = 10; // 10 minutes cooldown
+
+        $user = $this->createUser([
+            'name' => 'Cooldown User',
+            'can_specify_subdomains' => 1,
+        ]);
+
+        // Set the user in cooldown (simulate they were disconnected due to time limit)
+        $cooldownEndsAt = time() + (5 * 60); // 5 minutes from now
+        $userRepo = app(\Expose\Server\Contracts\UserRepository::class);
+        $this->await($userRepo->setCooldownForToken($user->auth_token, $cooldownEndsAt));
+
+        $this->createTestHttpServer();
+
+        $this->expectException(\Exception::class);
+
+        $client = $this->createClient();
+        $this->await($client->connectToServer('127.0.0.1:8085', 'cooldown-test', null, $user->auth_token));
+    }
+
     protected function startServer()
     {
         $this->app['config']['expose-server.subdomain'] = 'expose';

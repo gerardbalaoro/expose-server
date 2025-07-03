@@ -10,6 +10,8 @@ interface StatisticsCollector
 
     public function incomingRequest();
 
+    public function cooldownTriggered();
+
     public function flush();
 
     public function save();

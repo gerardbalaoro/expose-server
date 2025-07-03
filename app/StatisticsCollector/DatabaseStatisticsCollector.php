@@ -19,6 +19,9 @@ class DatabaseStatisticsCollector implements StatisticsCollector
     /** @var int */
     protected $requests = 0;
 
+    /** @var int */
+    protected $cooldowns = 0;
+
     public function __construct(DatabaseInterface $database)
     {
         $this->database = $database;
@@ -34,6 +37,7 @@ class DatabaseStatisticsCollector implements StatisticsCollector
         $this->sharedPorts = [];
         $this->sharedSites = [];
         $this->requests = 0;
+        $this->cooldowns = 0;
     }
 
     public function siteShared($authToken = null)
@@ -71,6 +75,15 @@ class DatabaseStatisticsCollector implements StatisticsCollector
         $this->requests++;
     }
 
+    public function cooldownTriggered()
+    {
+        if (! $this->shouldCollectStatistics()) {
+            return;
+        }
+
+        $this->cooldowns++;
+    }
+
     public function save()
     {
         $sharedSites = 0;
@@ -84,8 +97,8 @@ class DatabaseStatisticsCollector implements StatisticsCollector
         });
 
         $this->database->query('
-                    INSERT INTO statistics (timestamp, shared_sites, shared_ports, unique_shared_sites, unique_shared_ports, incoming_requests)
-                    VALUES (:timestamp, :shared_sites, :shared_ports, :unique_shared_sites, :unique_shared_ports, :incoming_requests)
+                    INSERT INTO statistics (timestamp, shared_sites, shared_ports, unique_shared_sites, unique_shared_ports, incoming_requests, cooldown_count)
+                    VALUES (:timestamp, :shared_sites, :shared_ports, :unique_shared_sites, :unique_shared_ports, :incoming_requests, :cooldown_count)
                 ', [
             'timestamp' => today()->toDateString(),
             'shared_sites' => $sharedSites,
@@ -93,6 +106,7 @@ class DatabaseStatisticsCollector implements StatisticsCollector
             'unique_shared_sites' => count($this->sharedSites),
             'unique_shared_ports' => count($this->sharedPorts),
             'incoming_requests' => $this->requests,
+            'cooldown_count' => $this->cooldowns,
         ])
         ->then(function () {
             $this->flush();

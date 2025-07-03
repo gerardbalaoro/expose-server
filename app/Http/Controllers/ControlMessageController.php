@@ -139,11 +139,16 @@ class ControlMessageController implements MessageComponentInterface
                 } elseif ($data->type === 'tcp') {
                     $this->handleTcpConnection($connection, $data, $user);
                 }
-            }, function () use ($connection) {
+            }, function ($error) use ($connection) {
+                $message = config('expose-server.messages.invalid_auth_token');
+                if ($error instanceof \Exception) {
+                    $message = $error->getMessage();
+                }
+                
                 $connection->send(json_encode([
                     'event' => 'authenticationFailed',
                     'data' => [
-                        'message' => config('expose-server.messages.invalid_auth_token'),
+                        'message' => $message,
                     ],
                 ]));
                 $connection->close();
@@ -287,8 +292,19 @@ class ControlMessageController implements MessageComponentInterface
             ->getUserByToken($authToken)
             ->then(function ($user) use ($deferred) {
                 if (is_null($user)) {
-                    $deferred->reject(new \Exception("Invalid auth token"));
+                    $deferred->reject(new \Exception(config('expose-server.messages.invalid_auth_token')));
                 } else {
+                    // Check if user is in cooldown
+                    if (!empty($user['cooldown_ends_at'])) {
+                        $currentTime = time();
+                        if ($currentTime < $user['cooldown_ends_at']) {
+                            $minutesRemaining = ceil(($user['cooldown_ends_at'] - $currentTime) / 60);
+                            $message = str_replace(':minutes', $minutesRemaining, config('expose-server.messages.connection_cooldown_active'));
+                            $deferred->reject(new \Exception($message));
+                            return;
+                        }
+                    }
+                    
                     $this->userRepository
                         ->updateLastSharedAt($user['id'])
                         ->then(function () use ($deferred, $user) {

@@ -50,6 +50,14 @@ class ConnectionManager implements ConnectionManagerContract
 
         $this->loop->addTimer($maximumConnectionLength * 60, function () use ($connection) {
             $connection->closeWithoutReconnect();
+            
+            // Set cooldown for authenticated users
+            $cooldownPeriod = config('expose-server.connection_cooldown_period', 0);
+            if ($cooldownPeriod > 0 && !empty($connection->authToken)) {
+                $cooldownEndsAt = time() + ($cooldownPeriod * 60);
+                app(\Expose\Server\Contracts\UserRepository::class)->setCooldownForToken($connection->authToken, $cooldownEndsAt);
+                $this->statisticsCollector->cooldownTriggered();
+            }
         });
     }
 

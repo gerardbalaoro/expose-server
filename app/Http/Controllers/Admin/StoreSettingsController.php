@@ -29,9 +29,13 @@ class StoreSettingsController extends AdminController
 
         config()->set('expose-server.maximum_connection_length', $request->get('maximum_connection_length'));
 
+        config()->set('expose-server.connection_cooldown_period', $request->get('connection_cooldown_period'));
+
         config()->set('expose-server.messages.message_of_the_day', Arr::get($messages, 'message_of_the_day'));
 
         config()->set('expose-server.messages.custom_subdomain_unauthorized', Arr::get($messages, 'custom_subdomain_unauthorized'));
+
+        config()->set('expose-server.messages.connection_cooldown_active', Arr::get($messages, 'connection_cooldown_active'));
 
         $httpConnection->send(
             respond_json([

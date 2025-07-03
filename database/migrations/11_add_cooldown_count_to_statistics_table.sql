@@ -1,0 +1,1 @@
+ALTER TABLE statistics ADD COLUMN cooldown_count INTEGER DEFAULT 0;
