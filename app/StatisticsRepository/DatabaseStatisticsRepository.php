@@ -29,7 +29,8 @@ class DatabaseStatisticsRepository implements StatisticsRepository
                 SUM(shared_ports) as shared_ports,
                 SUM(unique_shared_sites) as unique_shared_sites,
                 SUM(unique_shared_ports) as unique_shared_ports,
-                SUM(incoming_requests) as incoming_requests
+                SUM(incoming_requests) as incoming_requests,
+                SUM(cooldown_count) as cooldown_count
                 FROM statistics
                 WHERE
                 `timestamp` >= "'.$from.'" AND `timestamp` <= "'.$until.'"')

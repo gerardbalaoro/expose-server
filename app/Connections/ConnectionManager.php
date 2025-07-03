@@ -56,6 +56,7 @@ class ConnectionManager implements ConnectionManagerContract
             if ($cooldownPeriod > 0 && !empty($connection->authToken)) {
                 $cooldownEndsAt = time() + ($cooldownPeriod * 60);
                 app(\Expose\Server\Contracts\UserRepository::class)->setCooldownForToken($connection->authToken, $cooldownEndsAt);
+                $this->statisticsCollector->cooldownTriggered();
             }
         });
     }
