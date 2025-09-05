@@ -147,7 +147,7 @@ return [
         |
         */
     'users' => [
-        'username' => 'secret',
+        env('ADMIN_USERNAME', 'admin') => env('ADMIN_PASSWORD', 'secret')
     ],
 
     /*
