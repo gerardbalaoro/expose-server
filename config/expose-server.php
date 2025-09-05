@@ -102,7 +102,16 @@ return [
     | on your expose server.
     |
     */
-    'reserved_subdomains' => [],
+    'reserved_subdomains' => array_filter([
+        ...explode(',', env('RESERVED_SUBDOMAINS', '')),
+        'app',
+        'admin',
+        'auth',
+        'dashboard',
+        'login',
+        'user',
+        'web'
+    ]),
 
     /*
     |--------------------------------------------------------------------------
@@ -137,29 +146,29 @@ return [
     ],
 
     /*
-        |--------------------------------------------------------------------------
-        | Users
-        |--------------------------------------------------------------------------
-        |
-        | The admin dashboard of expose is protected via HTTP basic authentication
-        | Here you may add the user/password combinations that you want to
-        | accept as valid logins for the dashboard.
-        |
-        */
+    |--------------------------------------------------------------------------
+    | Users
+    |--------------------------------------------------------------------------
+    |
+    | The admin dashboard of expose is protected via HTTP basic authentication
+    | Here you may add the user/Expose1-Tunnel2-Share3 combinations that you want to
+    | accept as valid logins for the dashboard.
+    |
+    */
     'users' => [
         env('ADMIN_USERNAME', 'admin') => env('ADMIN_PASSWORD', 'secret')
     ],
 
     /*
-        |--------------------------------------------------------------------------
-        | User Repository
-        |--------------------------------------------------------------------------
-        |
-        | This is the user repository, which by default loads and saves all authorized
-        | users in a SQLite database. You can implement your own user repository
-        | if you want to store your users in a different store (Redis, MySQL, etc.)
-        |
-        */
+    |--------------------------------------------------------------------------
+    | User Repository
+    |--------------------------------------------------------------------------
+    |
+    | This is the user repository, which by default loads and saves all authorized
+    | users in a SQLite database. You can implement your own user repository
+    | if you want to store your users in a different store (Redis, MySQL, etc.)
+    |
+    */
     'user_repository' => \Expose\Server\UserRepository\DatabaseUserRepository::class,
 
     'subdomain_repository' => \Expose\Server\SubdomainRepository\DatabaseSubdomainRepository::class,
