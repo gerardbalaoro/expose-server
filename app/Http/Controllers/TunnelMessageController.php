@@ -79,6 +79,10 @@ class TunnelMessageController extends Controller
 
     protected function detectServerHost(Request $request): ?string
     {
+        if ($this->configuration->hostname()) {
+            return $this->configuration->hostname();
+        }
+
         return Str::before(Str::after($request->header('Host'), '.'), ':');
     }
 
