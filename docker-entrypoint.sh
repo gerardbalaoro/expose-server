@@ -1,9 +1,11 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-sed -i "s|username|${username}|g" ${exposeConfigPath} && sed -i "s|password|${password}|g" ${exposeConfigPath}
+: "${PORT:=8080}"
+: "${DOMAIN:=localhost}"
 
-if [[ $# -eq 0 ]]; then
-    exec /src/expose-server serve ${domain} --port ${port} --validateAuthTokens
+if [[ "$#" -gt 0 ]]; then
+  exec /src/expose-server serve "$@"
 else
-    exec /src/expose-server "$@"
+  exec /src/expose-server serve "${DOMAIN}" --port "${PORT}" --validateAuthTokens
 fi
