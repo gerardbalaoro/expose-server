@@ -3,6 +3,7 @@
 /.vscode
 /.vagrant
 /composer.lock
+/auth.json
 .phpunit.result.cache
 .box_dump
 .editorconfig

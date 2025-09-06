@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.6
 FROM php:8.2-cli
 
 RUN apt-get update
@@ -12,7 +13,8 @@ COPY . /src
 WORKDIR /src
 
 # install the dependencies
-RUN composer install -o --prefer-dist
+RUN --mount=type=secret,id=auth \
+    composer install -o --prefer-dist --no-interaction --no-progress
 
 ENV PORT=8080
 ENV DOMAIN=localhost

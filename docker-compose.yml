@@ -3,6 +3,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      secrets:
+        - auth
     env_file: .env
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -17,3 +19,7 @@ services:
     volumes:
       - ./database/expose.db:/root/.expose
       - .:/src
+
+secrets:
+  auth:
+    file: ./auth.json
